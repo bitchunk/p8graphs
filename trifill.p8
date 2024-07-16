@@ -11,8 +11,8 @@ __lua__
 	- @param  number c    -- vertex -b- coordinate x.
 	- @param  number m    -- vertex -b- coordinate y.
 	- @param  number r    -- vertex -c- coordinate x.
-	- @param  number b    -- vertex -c- coordinate x.
-	- @param  number col  -- vertex -c- coordinate x.
+	- @param  number b    -- vertex -c- coordinate y.
+	- @param  number col  -- fill color.
 	- @description
 		-- 
 ]]--
