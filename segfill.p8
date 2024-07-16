@@ -34,7 +34,7 @@ local s=0
 --s+=(tonum(btn(2))-tonum(btn(3)))*0.02
 --st+=(btn(4) or btn(5)) and s or 0
 --d+=(btn(4) or btn(5)) and 0 or s
---
+
 stoptime=btn(5) and (stoptime or time()-delaytime) or nil
 delaytime=stoptime and time()-stoptime or delaytime
 local bt=time()-delaytime
@@ -53,9 +53,9 @@ line(ex*1.4+x,ey*1.4+y,ex+x,ey+y,10)
 
 end
 
-function segfill(x,y,r,c,s,l)
+function segfill(x,y,r,c,s,d)
 	color(c)
-	local e=s+mid(l,1,-1)
+	local e=s+mid(d,1,-1)
 	if s>e then
 		s,e=e,s
 	end
@@ -88,7 +88,7 @@ function segfill(x,y,r,c,s,l)
 	--start-y to end-y
 --	color(deli(col) or c)
 	local i,xr=(ex-sx)/(ey-sy),sx+x
-	for u=sy,ey do
+	for u=sy,ey&0xffff do
 		rectfill(x-sqrt((r+u)*(r-u))*se,u+y,xr,u+y)
 		xr+=i
 	end
@@ -98,6 +98,8 @@ end
 update history
 **v0.2**
 	- remove extra judgments and variable swapping
+	- remove noise at distance 0
+	- distance 1 or more and 1 or less will make the result the same
 **v0.1**
 	- first release
 ]]--
