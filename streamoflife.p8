@@ -404,9 +404,24 @@ ftr st flowert 0
 --pal(10,15)
 --pal(9,7)
 --pal(15,11)
-floweroflife()
+segfloweroflife()
+--floweroflife()
 --seedoflife()
 
+--local t=htbl[[
+--{{
+--{1 1 0 11 0 0.50}
+--{2 6 0 11 16 1.00}
+--{3 6 0 11 32 -0.5}
+--{4 6 0 11 28 -0.75}
+--{5 6 0 11 48 0.25}
+--{6 6 0 11 42 0.36}
+--{7 6 0 11 42 0.64}
+--} 60}
+--]]
+--scmd([[
+--fsc ps fsetscript 0
+--]],t)
 --[[
 trs ps flowerde 50
 trs ps flowerde 100
@@ -487,30 +502,29 @@ if _lst then
 end	
 end
 
-function flset(flws,fsp,w)
+function flset(fbuf,fsp,w,f)
 
 local s=join(' '
 ,"trs ps flowerc"
 ,w
 )
-return scmd(s,{fsp,flws,sub=_prm.sub})
+--flower set params, flower buffer, draw function
+return scmd(s,{fsp,fbuf,f,sub=_prm.sub})
 --return fltbl
 end
 
-function fsetscript(t,ft)
-local aas=0
-	if _fst or t==true then
+function fsetscript()
+--local aas=0
+	if _fst then
 		_prm.fltbl={}
 		_prm.ord=nil
---		dmp(ft)
---		_prm.flws=ft or {}
 		_prm.flws=_prm.flws or {}
 		tmap(_prm,function(v,i)
 			if tonum(i) then
 				add(_prm.fltbl,v)
 			end
 		end)
-		aas+=1
+--		aas+=1
 --		return
 --		dmp('fs')
 	end
@@ -520,19 +534,16 @@ local aas=0
 			scmd([[
 				fsc ps fsetscript 0
 			]],_prm)
---				fsetscript(true)
 			return 1
 		end	
-		if _prm.ord then
-		?_prm.ord._cnt,0,0,7
---		stop()
-		end
+--		if _prm.ord then
+--		?_prm.ord._cnt,0,0,7
+--		end
 		local o=flset(_prm.flws,unpack(deli(_prm.fltbl,1)))
 		_prm.ord=o[#o]
-		if _prm.ord then
-		?o[#o]._cnt,32,0,7
---		stop()
-		end
+--		if _prm.ord then
+--		?o[#o]._cnt,32,0,7
+--		end
 --	dmp({aas,#_scal.trs.ords})
 --		dbg(_prm.ord)
 	end
@@ -542,71 +553,77 @@ local aas=0
 --	dbg(#_prm.fltbl)
 end
 
-function flowers(fpat,flws)
---function flowers(fpat)
---	local flws=_prm[3]
---	local flws={}
---dmp(fpat)
+--function flowers(fpat,flws,)
+function flowers(fpat,fbuf)
+
 	tmap(fpat,function(v,i)
-		local i,n,r,c,d,a=unpack(v)
+		local i,n,r,c,d,a,fn=unpack(v)
 		local f,sc={}
---dmp(i)
 
 		for j=1,n do
---			local pf,x,y,sr,sa,sd=flws[i] and flws[i][j],64,64,0,0,0
-			local pf,x,y,sr,sa,sd=flws[i] and flws[i][j],64,64,0,0,0
+			local pf,fpp,x,y,sr,sa,sd,sfn=
+			fbuf[i] and fbuf[i][j]
+			,{}
+			,64,64,0,0,0
+
 			if pf then
-				x,y,sr,sc,sa,sd=unpack(pf)
+				fpp,sa,sd,sfn=unpack(pf)
+				x,y,sr,sc,s,l=unpack(fpp)
+--				dmp(fn)
 			end
-		 --sx,sy,ex,ey,distance,radius,col,wait
+			fpp={x,y,sr,c,unpack(fn or sfn or {},2)}
 			f[j]={
-				x,y,sr,c,sa,sd --current
+				fpp,sa,sd --current
+				,fn or sfn or {'circ'} --drawfn
+--				,fn and fn[1] or 'circ' --drawfn
 				,sr,sa,sd  --start
 				,r,a,d,n				--end & prms
 			}
---			if i>8 then
---			dmp(f)
---			end
 		end
-		flws[i]=f
---		_prm[2][i]=f
+		fbuf[i]=f
 	end)
---	return flws
---	dmp(flws)
+--	dmp(fbuf)
 end
 
 function flowerc()
 	if _fst then
 --	dmp(_prm[1])
-		flowers(_prm[1],_prm[2])
+		flowers(unpack(_prm))
 	end
 --	dbg(_cnt)
 --		dmp(flws)
-	flws=_prm[2]
+	fbuf=_prm[2]
+--	func=_ENV[_prm[3]]
+--	dmp(func)
 --	dbg(#flws)
-	tmap(flws,function(v,i)
+	tmap(fbuf,function(v,i)
 
 --	dbg(i)
 --	tmap(_prm[3],function(v)
 		tmap(v,function(v,j)
---			local x,y,r,c,a,sx,sy,sr,sa,er,ea,d,n=unpack(v)
 			local pr
-			,x,y,r,c,a,d
+			,fpp,a,d
+			,fn
 			,sr,sa,sd
-			,er,ea,ed,n=(sin(_rate'0 -0.25')),unpack(v)
+			,er,ea,ed,n=sin(_rate'0 -0.25'),unpack(v)
+--			dmp()
 			a=_rate({sa,ea},_dur,_cnt*pr)
 			d=_rate({sd,ed},_dur,_cnt*pr)
 			local ex,ey=
 			d*sin(j/n+a)+64
 			,d*cos(j/n+a)+64
 			r=(_rate({sr,er},_dur,_cnt*pr))\1
---dbg(_cnt*pr/_dur)
---			dbg(x,y,r,sr,er)
---			dbg(sx,sy,sr,er)
+
 			if _lst then
 				sr,sa,sd=er,ea,ed
 			end
-			return {ex,ey,r,c,a,d,sr,sa,sd,er,ea,ed,n}
+
+			fpp={ex,ey,r,unpack(fpp,4),}
+			fpp[5]=(fn[2] or 0)+j/n
+			if #fpp>5 then
+--dmp(fpp)
+end
+			return {fpp,a,d,fn,sr,sa,sd,er,ea,ed,n}
 		end)
 		flwb[i]=v
 --		add(flwb,v)
@@ -625,9 +642,12 @@ function flowerd()
 --dmp(flwb)
 --	foreach()
 	tmap(flwb,function(v)
---		flip()
 		tmap(v,function(v)
-			circ(unpack(v))
+--dmp(_ENV[v[6]])
+--if v[8]=='segfill' then
+--dmp(1)
+--end
+			_ENV[v[4][1]](unpack(v[1]))
 		end)
 
 	end)
@@ -731,6 +751,144 @@ function trifill(l,t,c,m,r,b,col)
 	end
 end
 -->8
+function segfloweroflife()
+pal(htd'f202f404f9fe070809ff0af7',1)
+local t=htbl[[
+{{
+{1 1 0 11 0 1}
+{2 6 0 11 0 2}
+{3 6 0 11 0 -1.0}
+{4 6 0 11 0 -1.25}
+{5 6 0 11 0 0.5}
+{6 6 0 11 0 0.61}
+{7 6 0 11 0 0.89}
+} 1}
+{{
+{1 1 0 11 0 0}
+{2 6 0 11 16 1.00}
+{3 6 0 11 32 -0.5}
+{4 6 0 11 28 -0.75}
+{5 6 0 11 48 0.25}
+{6 6 0 11 42 0.36}
+{7 6 0 11 42 0.64}
+} 60}
+{{
+{1 1 16 11 0 0}
+{2 6 16 14 16 0.0}
+{3 6 16 10 32 0.0}
+{4 6 16 9 28 -0.25}
+{5 6 16 6 48 0.0}
+{6 6 16 5 42 0.11}
+{7 6 16 5 42 0.39}
+{8 6 0 12 0 0}
+{9 6 0 12 16 0.0}
+{10 6 0 12 16 0.0}
+{11 6 0 12 16 0.0}
+{12 6 0 12 16 0.0}
+{13 6 0 12 16 0.0}
+{14 6 0 12 16 0.0}
+{15 6 0 12 32 0.0}
+{16 6 0 12 32 0.0}
+{17 6 0 12 32 0.0}
+{18 6 0 12 32 0.0}
+{19 6 0 12 32 0.0}
+{20 6 0 12 32 0.0}
+{21 6 0 12 28 -0.25}
+{22 6 0 12 28 -0.25}
+{23 6 0 12 28 -0.25}
+{24 6 0 12 28 -0.25}
+{25 6 0 12 28 -0.25}
+{26 6 0 12 28 -0.25}
+} 60}
+{{
+{1 1 16 11 0 0}
+{2 6 16 14 16 0.0}
+{3 6 16 10 32 0.0}
+{4 6 16 9 28 -0.25}
+{5 6 16 6 48 0.0}
+{6 6 16 5 42 0.11}
+{7 6 16 5 42 0.39}
+} 20}
+{{
+{1 1 8 11 0 0}
+{2 6 8 14 16 0.0}
+{3 6 8 10 32 0.0}
+{4 6 8 9 28 -0.25}
+{5 6 8 6 48 0.0}
+{6 6 8 5 42 0.11}
+{7 6 8 5 42 0.39}
+{8 6 16 14 0 0 {segfill 0 0.1666}}
+{9 6 16 12 16 0.0 {segfill 0 0.1666}}
+{10 6 16 12 16 0.0 {segfill 0.1666 0.1667}}
+{11 6 16 12 16 0.0 {segfill 0.3333 0.1667}}
+{12 6 16 12 16 0.0 {segfill 0.5 0.1667}}
+{13 6 16 12 16 0.0 {segfill 0.6666 0.1667}}
+{14 6 16 12 16 0.0 {segfill 0.8333 0.1667}}
+{15 6 16 9 32 0.0 {segfill 0 0.1666}}
+{16 6 16 9 32 0.0 {segfill 0.1666 0.1667}}
+{17 6 16 9 32 0.0 {segfill 0.3333 0.1667}}
+{18 6 16 9 32 0.0 {segfill 0.5 0.1667}}
+{19 6 16 9 32 0.0 {segfill 0.6666 0.1667}}
+{20 6 16 9 32 0.0 {segfill 0.8333 0.1667}}
+{21 6 16 14 28 -0.25 {segfill 0 0.1666}}
+{22 6 16 14 28 -0.25 {segfill 0.1666 0.1667}}
+{23 6 16 14 28 -0.25 {segfill 0.3333 0.1667}}
+{24 6 16 14 28 -0.25 {segfill 0.5 0.1667}}
+{25 6 16 14 28 -0.25 {segfill 0.6666 0.1667}}
+{26 6 16 14 28 -0.25 {segfill 0.8333 0.1667}}
+} 10}
+{{
+{1 1 14 11 0 0}
+{2 6 14 14 16 0.0}
+{3 6 14 10 32 0.0}
+{4 6 14 9 28 -0.25}
+{5 6 14 6 48 0.0}
+{6 6 14 5 42 0.11}
+{7 6 14 5 42 0.39}
+} 20}
+{{
+} 30}
+{{
+{1 1 0 11 0 0}
+{2 6 0 14 16 1.00}
+{3 6 0 10 32 -0.5}
+{4 6 0 9 28 -0.75}
+{5 6 0 6 48 0.25}
+{6 6 0 5 42 0.36}
+{7 6 0 5 42 0.64}
+{8 6 128 14 0 -0.25}
+{9 6 16 12 128 0.25}
+{10 6 16 12 128 0.25}
+{11 6 16 12 128 0.25}
+{12 6 16 12 128 0.25}
+{13 6 16 12 128 0.25}
+{14 6 16 12 128 0.25}
+{15 6 16 9 160 -0.25}
+{16 6 16 9 160 -0.25}
+{17 6 16 9 160 -0.25}
+{18 6 16 9 160 -0.25}
+{19 6 16 9 160 -0.25}
+{20 6 16 9 160 -0.25}
+{21 6 16 14 152 0.0}
+{22 6 16 14 152 0.0}
+{23 6 16 14 152 0.0}
+{24 6 16 14 152 0.0}
+{25 6 16 14 152 0.0}
+{26 6 16 14 152 0.0}
+} 60}
+
+]]
+
+scmd([[
+fsc ps fsetscript 0
+]],t)
+--[[
+trs ps flowerde 80
+trs ps flowerde 160
+
+]]
+end
+
 function floweroflife()
 pal(htd'f202f404f9fe070809ff0af7',1)
 local t=htbl[[
@@ -837,7 +995,7 @@ t=htbl[[
 {5 6 16 10 0 0.5}
 {6 12 16 9 0 -0.5}
 {7 18 16 4 0 1.0}
-} 1}
+} 1 circ}
 {{
 {1 1 20 7 0 0}
 {2 6 20 10 20 0.6}
@@ -846,7 +1004,7 @@ t=htbl[[
 {5 6 20 7 0 0.5}
 {6 12 20 7 0 -0.5}
 {7 18 20 7 0 1.0}
-} 16}
+} 16 circ}
 {{
 {1 1 16 7 0 0}
 {2 6 16 10 16 0.5}
@@ -855,7 +1013,7 @@ t=htbl[[
 {5 6 16 7 0 0.5}
 {6 12 16 7 0 -0.5}
 {7 18 16 7 0 1.0}
-} 30}
+} 30 circ}
 {{
 {1 1 16 7 0 0}
 {2 6 16 10 112 0.5}
@@ -864,7 +1022,7 @@ t=htbl[[
 {5 6 16 10 16 0.5}
 {6 12 16 9 32 -0.5}
 {7 18 16 4 48 1.0}
-} 60}
+} 60 circ}
 ]]
 scmd([[
 fsc ps fsetscript 0
